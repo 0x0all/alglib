@@ -89,6 +89,7 @@ static void unit_test(void)
     Vertex *u = new Vertex;
     u->set_id(i+1);
     v->add_connect(*u, OUT_GOING);
+    u->add_connect(*v, IN_COMING);
   }
 	
   cout << "Now have " << v->get_edges(OUT_GOING) << " edges"<< endl;
@@ -101,6 +102,7 @@ static void unit_test(void)
   while (v->get_edges(OUT_GOING) != 0) {
     Vertex& u = v->front(OUT_GOING);
     v->remove_connect(u, OUT_GOING);
+    u.remove_connect(*v, IN_COMING);
   }
 	
   cout << "then have " << v->get_edges(OUT_GOING) << " edges"<< endl;
