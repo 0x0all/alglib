@@ -2,13 +2,13 @@
  *  graph.cpp
  *  
  *
- *  Created by TSU-LING LIN on 9/3/09.
+ *  Created by BRIAN PIN on 9/3/09.
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
 #include <list>
-#include "graph.h"
 #include <iostream>
+#include "graph.h"
 
 using namespace std;
 
@@ -18,69 +18,113 @@ Vertex::Vertex()
 
 void Vertex::set_id(int id)
 {
-	this->identifier_ = id;
+	this->m_id = id;
 }
 
 int Vertex::get_id(void) const
 {
-	return this->identifier_;
+	return this->m_id;
 }
 
 Vertex::~Vertex()
 {
+	cout<< "Remove a vertex: "<< this->get_id() << endl;
 }
 
-void Vertex::add_connect(Vertex& v, VEDirection direction)
+void Vertex::add_connect(Vertex* v, EdgeDirection direction)
 {
 	if (direction == OUT_GOING)
-		outs_.push_back(&v);
+		m_outs.push_back(v);
 	else
-		ins_.push_back(&v);
+		m_ins.push_back(v);
 }
 
 /*
  *   FIXME: O(N) type of remove algorithm is not good
  */
-void Vertex::remove_connect(Vertex& v, VEDirection direction)
+void Vertex::remove_connect(Vertex* v, EdgeDirection direction)
 {
 	if (direction == OUT_GOING)
-		outs_.remove(&v);
+		m_outs.remove(v);
 	else
-		ins_.remove(&v);
+		m_ins.remove(v);
 }
 
-unsigned Vertex::get_edges(VEDirection direction)
+int Vertex::get_edges(EdgeDirection direction)
 {
-	unsigned ret;
+	int ret;
 	if (direction == OUT_GOING)
-		ret = outs_.size();
+		ret = m_outs.size();
 	else
-		ret = ins_.size();
+		ret = m_ins.size();
 	
 	return ret;
 }
 
-Vertex& Vertex::pop_first(VEDirection direction)
+Vertex* Vertex::front(EdgeDirection direction)
 {
-	
+	Vertex* v;
+	switch (direction) {
+	case OUT_GOING:
+		v = this->m_outs.front();
+		break;
+	case IN_COMING:
+		v = this->m_ins.front();
+		break;
+	default:
+		v = NULL;
+		break;
+	}
+	return v;
+}
+
+vertices::iterator Vertex::get_begin(EdgeDirection direction)
+{
+	vertices::iterator i;
+	switch (direction) {
+	case OUT_GOING:
+		i = this->m_outs.begin();
+		break;
+	case IN_COMING:
+		i = this->m_ins.begin();
+		break;
+	default:
+		i = NULL;
+		break;
+	}
+
+	return i;
 }
 
 static void unit_test(void)
 {
 	Vertex *v = new Vertex;
+	v->set_id(0);
 	for (int i = 0; i < 3; ++i) {
 		Vertex *u = new Vertex;
-		v->add_connect(*v, OUT_GOING);
+		v->add_connect(u, OUT_GOING);
+		u->set_id(i+1);
 	}
 	
 	cout << "Now have " << v->get_edges(OUT_GOING) << " edges"<< endl;
-	int num_outs = v->get_edges(OUT_GOING);
-	
-	for (int i = 0; i < num_outs; i++) {
-		
+	vertices::iterator it = v->get_begin(OUT_GOING);
+	for (int i = 0; i < v->get_edges(OUT_GOING); i++) {
+		cout << "IDs: "<<(*it)->get_id()<<endl;
+		it++;
 	}
 	
-	delete v;
+	
+	while (v->get_edges(OUT_GOING) != 0) {
+		Vertex* u = v->front(OUT_GOING);
+		v->remove_connect(u, OUT_GOING);
+		delete u;
+	}
+	
+	cout << "then have " << v->get_edges(OUT_GOING) << " edges"<< endl;
+	
+	if (v) {
+		delete v;
+	}
 }
 
 int main(int argc, char* argv[])
