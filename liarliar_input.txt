@@ -1,0 +1,13 @@
+5
+Allen  1
+Frank
+Chris  1
+Bill
+Dick   2
+Bill
+Edmund
+George 1
+Bill
+Huffman 1
+Allen
+
