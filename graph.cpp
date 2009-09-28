@@ -6,128 +6,69 @@
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
+
 #include <list>
+#include <queue>
 #include <iostream>
 #include "graph.h"
 
-using namespace std;
 
-void Vertex::set_id(int id)
+// added but mem already been allocated
+void Graph::add_vertex(const Vertex& new_v)
 {
-	this->m_id = id;
+	graph_vertices.push_back(new_v);
 }
 
-int Vertex::get_id(void) const
+// deleted but mem not recycled
+void Graph::del_vertex(const Vertex& v)
 {
-	return this->m_id;
-}
-
-void Vertex::add_connect(Vertex& v, EdgeDirection direction)
-{
-	if (direction == OUT_GOING)
-		m_outs.push_back(v);
-	else
-		m_ins.push_back(v);
-}
-
-/*
- *   FIXME: O(N) type of remove algorithm is not good
- */
-void Vertex::remove_connect(const Vertex& v, EdgeDirection direction)
-{
-	if (direction == OUT_GOING)
-		m_outs.remove(v);
-	else
-		m_ins.remove(v);
-}
-
-int Vertex::get_edges(EdgeDirection direction)
-{
-	int ret;
-
-	if (direction == OUT_GOING)
-		ret = m_outs.size();
-	else
-		ret = m_ins.size();
-
-	return ret;
-}
-
-Vertex& Vertex::front(EdgeDirection direction)
-{
-	if (direction == OUT_GOING)
-		return this->m_outs.front();
-	else
-		return this->m_ins.front();
-}
-
-vertices::iterator Vertex::begin(EdgeDirection direction)
-{
-	v_iter i;
-	if (direction == OUT_GOING)
-		i = this->m_outs.begin();
-	else
-		i = this->m_ins.begin();
-
-	return i;
-}
-
-bool Vertex::operator==(const Vertex& u)
-{
-	if (this->m_id == u.m_id)
-		return true;
-	else
-		return false;
-}
-
-void Vertex::visit(void)
-{
-	cout << "basic visit method" << endl;
-}
-
-// -----------------------------Graph class implementation ---------------------
-
-void Graph::bfs_traversal(Vertex& startv)
-{
-
-}
-
-// -----------------------------Below is test area -----------------------------
-
-static void unit_test(void)
-{
-	Vertex *v = new Vertex;
-	v->set_id(9);
-
-	for (int i = 0; i < 3; ++i) {
-		Vertex *u = new Vertex;
-		u->set_id(i+1);
-		v->add_connect(*u, OUT_GOING);
-		u->add_connect(*v, IN_COMING);
+	vertices::const_iterator it;
+	for (it = graph_vertices.begin(); it != graph_vertices.end(); it++) {
+		if (*it != v) {
+			it->del_connection(v);
+		}
 	}
 	
-	cout << "Now have " << v->get_edges(OUT_GOING) << " edges"<< endl;
-	v_iter it = v->begin(OUT_GOING);
-	for (int i = 0; i < v->get_edges(OUT_GOING); i++) {
-		cout << "IDs: "<< (*it).get_id() <<endl;
-		it++;
-	}
-	
-	while (v->get_edges(OUT_GOING) != 0) {
-		Vertex& u = v->front(OUT_GOING);
-		v->remove_connect(u, OUT_GOING);
-		u.remove_connect(*v, IN_COMING);
-	}
-	
-	cout << "then have " << v->get_edges(OUT_GOING) << " edges"<< endl;
+	graph_vertices.del_connection(v);
+}
 
-	if (v) {
-		delete v;
+void build_connection(const Vertex& parent, const Vertex& child)
+{
+	parent.add_connection(child);
+}
+
+void bfs_search(const Vertex& source)
+{
+}
+
+int unit_test1(void)
+{
+	Vertex u("u");
+	Vertex v1("v1");
+	Vertex v2("v2");
+	Vertex v3("v3");
+	Vertex v4("v4");
+
+	Vertex u1;
+
+	u.add_connection(v1);
+	u.add_connection(v2);
+	u.add_connection(v3);
+	u.add_connection(v4);
+
+	u1 = u;
+	std::cout << "Name: " << u1.get_name() << std::endl;
+	vertices::const_iterator it;
+	for (it = u1.connection_begin(); 
+		 it != u1.connection_end();
+		 it ++) {
+		std::cout << "Child: " << it->get_name() <<std::endl;
 	}
 }
+
 
 int main(int argc, char* argv[])
 {
-	unit_test();
+	unit_test1();
 	return 0;
 }

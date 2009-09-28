@@ -10,18 +10,15 @@ enum PeopleTypes {
 };
 
 // each liar is a vertex on a graph
-class Liar : public Vertex {
+class Liar : public Graph {
 private:
 	enum PeopleTypes		m_personality;
 public:
     Liar()					{ m_personality = e_Default; }
 	virtual ~Liar()			{ }
-	
-	void					set_personality(enum PeopleTypes ch) {m_personality = ch;}
-	enum PeopleTypes		get_personality() { return m_personality; }
-	
-	// visit method
-	virtual void			visit();
+
+	// visiting
+	virtual void			bfs_search();
 };
 
 #endif
