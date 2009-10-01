@@ -1,2 +1,3 @@
-graphtest
-liartest
+*.o
+testgraph
+testliar
