@@ -17,8 +17,6 @@ public:
     Liar()					{ m_personality = e_Default; }
 	virtual ~Liar()			{ }
 
-	// visiting
-	virtual void			bfs_search();
 };
 
 #endif

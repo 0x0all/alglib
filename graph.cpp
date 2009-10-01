@@ -22,23 +22,32 @@ void Graph::add_vertex(const Vertex& new_v)
 // deleted but mem not recycled
 void Graph::del_vertex(const Vertex& v)
 {
-	vertices::const_iterator it;
+	vertices::iterator it;
+	
+	// let all other connections know v is going to disconnect
 	for (it = graph_vertices.begin(); it != graph_vertices.end(); it++) {
 		if (*it != v) {
 			it->del_connection(v);
 		}
 	}
-	
-	graph_vertices.del_connection(v);
+
+	// let v disappear on graph_vertices list
+	for (it = graph_vertices.begin(); it != graph_vertices.end(); it++) {
+		if (*it == v) {
+			graph_vertices.erase(it);
+			break;
+		}
+	}
 }
 
-void build_connection(const Vertex& parent, const Vertex& child)
+void build_connection(Vertex& parent, const Vertex& child)
 {
 	parent.add_connection(child);
 }
 
 void bfs_search(const Vertex& source)
 {
+	// to be implemented
 }
 
 int unit_test1(void)
