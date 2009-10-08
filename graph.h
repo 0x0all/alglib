@@ -14,8 +14,9 @@
 
 enum VertexState {
 	WHITE =		1,
-	GREY =		2,
+	GRAY =		2,
 	BLACK =		3,
+	SOURCE =	4,
 };
 
 class Vertex {
@@ -138,7 +139,7 @@ public:
 	virtual void add_vertex(Vertex* new_v);
 	virtual void del_vertex(Vertex* v);
 	virtual void add_edge(Vertex* parent, Vertex* child);
-	virtual void bfs_search(const Vertex& source);
+	virtual void bfs_search(Vertex* source);
 };
 
 #endif // __GRAPH_H__

@@ -38,8 +38,30 @@ void Graph::add_edge(Vertex* parent, Vertex* child)
 	parent->add_child(child);
 }
 
-void Graph::bfs_search(const Vertex& source)
+void Graph::bfs_search(Vertex* source)
 {
+	std::list<Vertex*> bfs_q;
+	vertices::const_iterator it;
+	
+	for (it = vertex_list.begin(); it != vertex_list.end(); it++) {
+		if (*it != source)
+			(*it)->set_state(WHITE);
+		else
+			(*it)->set_state(GRAY);
+	}
+
+	bfs_q.push_back(source);
+	while (bfs_q.empty() != true) {
+		Vertex* u = bfs_q.front();
+		bfs_q.pop_front();
+		for (it = u->first_child(); it != u->last_child(); it++) {
+			if ((*it)->get_state()== WHITE) {
+				(*it)->set_state(GRAY);
+				bfs_q.push_back(*it);
+			}
+		}
+		u->set_state(BLACK);
+	}
 }
 
 int unit_test1(void)
