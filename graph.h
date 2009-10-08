@@ -12,53 +12,58 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
-class VertexAssignException : public std::exception
-{
-	virtual const char* what() const throw()
-	{
-		return "Vertex operator= assign to an existing Vertex";
-	}
-};
-
-enum VertexFlags {
-	WHITE = 1,
-	GREY = 2,
-	BLACK = 3,
+enum VertexState {
+	WHITE =		1,
+	GREY =		2,
+	BLACK =		3,
 };
 
 class Vertex {
+private:
+	unsigned				state;
+	std::string				name;
+	std::list<Vertex*>		child_list;
+
 public:
 	typedef std::list<Vertex*> vertices;
-	Vertex() { }
+
+	// ctor/dtor
+	Vertex() : name("no name") { }
 	explicit Vertex(std::string aname) : name(aname)
 	{ std::cout<<name<<" created"<<std::endl; }
-
 	virtual ~Vertex() {std::cout<<name<<" deleted"<<std::endl;}
-	
-	//
+
 	// copy and assign
-	//
 	Vertex(const Vertex& that_v)
 	{
+		state = that_v.state;
 		name = that_v.name;
 		std::cout<<name<<" copied"<<std::endl;
-	}
-	
-	Vertex& operator=(const Vertex& that_v)
-	{
-		name = that_v.name;
-		std::cout<<name<<" assigned"<<std::endl;
-		if (true != connection_list.empty()) {
-			throw VertexAssignException();
-		}
-		connection_list.clear();
+		child_list.clear();
 		vertices::const_iterator it;
-		for (it = that_v.connection_begin(); it != that_v.connection_end(); it ++) {
-			add_connection(*it);
+		for (it = that_v.first_child();
+			 it != that_v.last_child();
+			 it ++) {
+			add_child(*it);
 		}
 	}
 
-	// compare, do I need it?
+	Vertex& operator=(const Vertex& that_v)
+	{
+		state = that_v.state;
+		name = that_v.name;
+		std::cout<<name<<" assigned"<<std::endl;
+		child_list.clear();
+		vertices::const_iterator it;
+		for (it = that_v.first_child();
+			 it != that_v.last_child();
+			 it ++) {
+			add_child(*it);
+		}
+
+		return *this;
+	}
+
 	bool operator==(const Vertex& u) const
 	{
 		if (this == &u && name == u.name)
@@ -71,92 +76,69 @@ public:
 	{
 		return !(*this==u);
 	}
-	
-	const std::string& get_name(void) const
+
+	// getters and setters
+	std::string get_name(void) const
 	{
 		return this->name;
+	}
+	void set_state(unsigned s)
+	{
+		state = s;
+	}
+	unsigned get_state(void) const
+	{
+		return state;
 	}
 	
 
 	//
 	//  Add and Remove child vertex operation
 	//
-	void add_connection(Vertex* v)
+	void add_child(Vertex* v)
 	{
-		connection_list.insert(connection_list.begin(), 1, v);
+		child_list.insert(child_list.begin(), 1, v);
 	}
 	
-	void del_connection(Vertex* v)
+	void del_child(Vertex* v)
 	{
 		vertices::iterator it;
-		for (it = connection_list.begin(); it != connection_list.end();
-				it ++) {
+		for (it = child_list.begin(); it != child_list.end(); it ++) {
 			if (*it == v) {
-				connection_list.erase(it);
+				child_list.erase(it);
 				std::cout << "remove " << (*it)->get_name() << std::endl;
 			}
 		}
 	}
 
-
-	//
-	//  begin and end iterator
-	//
-	vertices::const_iterator connection_begin(void) const
+	vertices::const_iterator first_child(void) const
 	{
-		return connection_list.begin();
+		return child_list.begin();
 	}
 
-	vertices::const_iterator connection_end(void) const
+	vertices::const_iterator last_child(void) const
 	{
-		return connection_list.end();
+		return child_list.end();
 	}
-	
-	void set_dist(unsigned dist)
-	{
-		dist_src = dist;
-	}
-	
-	unsigned	get_dist(void) const
-	{
-		return dist_src;
-	}
-	
-	void set_flag(unsigned f)
-	{
-		flag = f;
-	}
-	
-	unsigned get_flag(void) const
-	{
-		return flag;
-	}
-
-private:
-	unsigned				flag;
-	unsigned				dist_src;
-	std::string				name;
-	mutable vertices		connection_list;
 };
 
-#if 0
 class Graph {
+private:
+	// disallow the copy constructor and assign operator
+	Graph(const Graph& that_g);
+	Graph& operator=(const Graph& that_g);
+	std::list<Vertex*>			vertex_list;
 public:
-	typedef std::list<Vertex> vertices;
+	typedef std::list<Vertex*>	vertices;
 	Graph();
 	virtual ~Graph();
 	// copy and assign
 
 	// building and traversing
-	virtual void	add_vertex(Vertex& new_v);
-	virtual void	del_vertex(const Vertex& v);
-	virtual void	build_connection(Vertex& parent, const Vertex& child);
-	virtual void	bfs_search(const Vertex& source);
-private:
-	// disallow the copy constructor and assign operator
-	Graph(const Graph& that_g);
-	Graph& operator=(const Graph& that_g);
-	vertices		graph_vertices;
+	virtual void add_vertex(Vertex* new_v);
+	virtual void del_vertex(Vertex* v);
+	virtual void add_edge(Vertex* parent, Vertex* child);
+	virtual void bfs_search(const Vertex& source);
 };
-#endif
+
 #endif // __GRAPH_H__

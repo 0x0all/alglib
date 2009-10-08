@@ -12,58 +12,36 @@
 #include <iostream>
 #include "graph.h"
 
-#if 0
 // added but mem already been allocated
-void Graph::add_vertex(Vertex& new_v)
+void Graph::add_vertex(Vertex* new_v)
 {
-	graph_vertices.push_back(new_v);
+	vertex_list.insert(vertex_list.begin(), 1, new_v);
 }
 
 // deleted but mem not recycled
-void Graph::del_vertex(const Vertex* v)
+void Graph::del_vertex(Vertex* v)
 {
 	vertices::iterator it;
-	
-	// let all other connections know v is going to disconnect
-	for (it = graph_vertices.begin(); it != graph_vertices.end(); it++) {
-		if (*it != v) {
-			it->del_connection(v);
-		}
-	}
 
-	// let v disappear on graph_vertices list
-	for (it = graph_vertices.begin(); it != graph_vertices.end(); it++) {
-		if (*it == v) {
-			graph_vertices.erase(it);
-			break;
+	// let all other connections know v is going to disconnect
+	for (it = vertex_list.begin(); it != vertex_list.end(); it++) {
+		if (*it != v) {
+			(*it)->del_child(v);
+		} else {
+			vertex_list.erase(it);
 		}
 	}
 }
 
-void Graph::build_connection(Vertex& parent, const Vertex& child)
+void Graph::add_edge(Vertex* parent, Vertex* child)
 {
-	parent.add_connection(child);
+	parent->add_child(child);
 }
 
 void Graph::bfs_search(const Vertex& source)
 {
-	std::list<Vertex> bfs_q;
-	vertices::iterator it;
-
-	// initialization
-	for (it = graph_vertices.begin(); it != graph_vertices.end(); it++) {
-		if (source != *it) {
-			it->set_dist((unsigned)(-1));
-			it->set_flag(WHITE);
-		}
-	}
-	
-	bfs_q.push_back(source);
-	while (true != bfs_q.empty()) {
-		bfs_q.erase(bfs_q.begin());
-	}
 }
-#endif
+
 int unit_test1(void)
 {
 	typedef std::list<Vertex*> vertices;
@@ -75,16 +53,17 @@ int unit_test1(void)
 
 	Vertex u1;
 
-	u.add_connection(&v1);
-	u.add_connection(&v2);
-	u.add_connection(&v3);
-	u.add_connection(&v4);
+	u.add_child(&v1);
+	u.add_child(&v2);
+	u.add_child(&v3);
+	u.add_child(&v4);
 
 	u1 = u;
+
 	std::cout << "Name: " << u1.get_name() << std::endl;
 	vertices::const_iterator it;
-	for (it = u1.connection_begin(); 
-		 it != u1.connection_end();
+	for (it = u1.first_child(); 
+		 it != u1.last_child();
 		 it ++) {
 		std::cout << "Child: " << (*it)->get_name() <<std::endl;
 	}
