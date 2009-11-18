@@ -1,3 +1,5 @@
 *.o
 testgraph
 testliar
+.cproject
+.project
