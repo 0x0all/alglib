@@ -1,22 +1,29 @@
+/*
+ *  Copy right(c) Brian Pin 2009.
+ */
+
 #ifndef __LIARLIAR_H__
 #define __LIARLIAR_H__
 
+#include <string>
 #include "graph.h"
 
-enum PeopleTypes {
-	e_Default = 0,
-	e_Liar = 1,
-	e_Trusty = 2,
+struct ClubMember {
+  std::string  _member_name;
 };
+/*
+ *  class Club is a kind of graph
+ *
+ */
 
-// each liar is a vertex on a graph
-class Liar : public Graph {
+class Club : public std::BaseGraph<struct ClubMember> {
 private:
-	enum PeopleTypes		m_personality;
+  int _nr_members;
 public:
-    Liar()					{ m_personality = e_Default; }
-	virtual ~Liar()			{ }
+  Club() {}
+  virtual ~Club() {}
 
+  int build_club(const char* filename);
 };
 
 #endif

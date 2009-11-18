@@ -2,21 +2,20 @@ SHELL = /bin/sh
 CXX = g++
 CXXFLAGS = -g
 
-.SUFFIXES:
-.SUFFIXES: .c .cpp .o
+GRAPH_SRC = graph.cpp Graphs.cpp
+GRAPH_OBJ = graph.o Graphs.o
+LIARLIAR_SRC = liarliar.cpp graph.cpp
+LIARLIAR_OBJ = liarliar.o graph.o
 
-all: testgraph testliar
+all:	liarliar testgraph
 
-testgraph: graph.o
-	$(CXX) -o $@ $<
+liarliar: $(LIARLIAR_OBJ)
+	$(CXX) -o $@ $(LIARLIAR_OBJ)
 
-graph.o: graph.h graph.cpp
+testgraph: $(GRAPH_OBJ)
+	$(CXX) -o $@ $(GRAPH_OBJ)
 
-testliar: liarliar.o
-	$(CXX) -o $@ $<
-
-liarliar.o: liarliar.h liarliar.cpp
-
-.PHONY: clean
 clean:
-	rm testgraph testliar
+	rm -f *.o
+	rm -f liarliar
+	rm -f testgraph
