@@ -3,3 +3,6 @@ testgraph
 testliar
 .cproject
 .project
+*.swp
+liarliar
+tags
