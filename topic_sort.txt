@@ -1,0 +1,17 @@
+7
+undershorts     2
+pants
+shoes
+pants           2
+belt
+shoes
+belt            1
+jacket
+shirt           2
+belt
+tie
+tie             1
+jacket
+socks           1
+shoes
+watch           0

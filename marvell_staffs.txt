@@ -1,0 +1,32 @@
+11
+mary      3
+natali
+queen
+xray
+natali    3
+queen
+ulla
+owen
+owen      3
+rachel
+veronica
+steve
+peter     3
+owen
+steve
+zebra
+queen     1
+tony
+rachel    2
+yoshi
+ulla
+steve     1
+rachel
+ulla      1
+tony
+veronica  1
+xray
+winnie    1
+zebra
+yoshi     1
+veronia
