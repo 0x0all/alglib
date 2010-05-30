@@ -1,21 +1,31 @@
 SHELL = /bin/sh
 CXX = g++
+CC = gcc
 CXXFLAGS = -g
 
-GRAPH_SRC = graph.cpp Graphs.cpp
-GRAPH_OBJ = graph.o Graphs.o
-LIARLIAR_SRC = liarliar.cpp graph.cpp
-LIARLIAR_OBJ = liarliar.o graph.o
 
-all:	liarliar testgraph
+OBJS := test_graph.o
 
-liarliar: $(LIARLIAR_OBJ)
-	$(CXX) -o $@ $(LIARLIAR_OBJ)
 
-testgraph: $(GRAPH_OBJ)
-	$(CXX) -o $@ $(GRAPH_OBJ)
+%.o: %.cc
+	$(CXX) -c $(CXXFLAGS) $*.cc -o $*.o
+	$(CXX) -MM $(CXXFLAGS) $*.cc > $*.d
+	@cp -f $*.d $*.d.tmp
+	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | \
+	 sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
+	@rm -f $*.d.tmp
+
+# this line tells make to suspend reading current Makefile
+# but read (include
+-include $(OBJS:.o=.d)
+
+all: testgraph
+
+testgraph: test_graph.o
+	$(CXX) -o $@ $(OBJS)
 
 clean:
-	rm -f *.o
-	rm -f liarliar
-	rm -f testgraph
+	@rm -f *.o
+	@rm -f testgraph
+	@rm -f *.d
+	@rm -f a.out
