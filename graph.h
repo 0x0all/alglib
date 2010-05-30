@@ -3,7 +3,7 @@
  *  Created by BRIAN PIN on 9/3/2009.
  *  Copyright 2009 P. All rights reserved.
  *  Learning points:
- *	1. Simple, simplicity
+ *  1. Simple, simplicity
  *  2. const_iterator and iterator,
  *  3. exception types
  *  4. mutable keyword
@@ -12,186 +12,234 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
-namespace std {
+#include<iostream>
+#include<sstream>
+#include<fstream>
+#include<list>
 
-enum VertexState {
-  WHITE = 1, // not visited
-  GRAY = 2,
-  BLACK = 3,
-  SOURCE = 4,
-};
-
-typedef enum VertexState VertexState_e;
-
-template <typename _Tp>
-class Vertex {
-
-  string  _vt_name;
-  VertexState_e  _vt_state;
-  list<_Tp*>  _vt_next;
-
-protected:
-  typedef void* _Void_pointer;
-
-public:
-
-  typedef _Tp value_type;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
-
-  // constructor/destructor
-  Vertex() : _vt_name("no name")
-    {}
-  explicit Vertex(string name) : _vt_name(name)
-    {cout << _vt_name << " created" << endl;}
-
-  virtual ~Vertex()
-    {cout << _vt_name << " deleted" << endl;}
-
-  // copy constructor
-  Vertex(const Vertex<_Tp>& that_v) {
-    _vt_state = that_v._vt_state;
-    _vt_name = that_v._vt_name;
-    _vt_next.clear();
-    typename list<_Tp*>::const_iterator cit;
-    for (cit = that_v.first_child() ; cit != that_v.last_child() ; cit ++) {
-      add_child(*cit);
-    }
-    cout << _vt_name << " copied" << endl;
-
-  }
-
-  Vertex<_Tp>& operator=(const Vertex<_Tp>& that_v)
-  {
-    _vt_state = that_v._vt_state;
-    _vt_name = that_v._vt_name;
-    _vt_next.clear();
-    typename list<_Tp*>::const_iterator cit;
-    for (cit = that_v.first_child() ; cit != that_v.last_child() ; cit ++) {
-      add_child(*cit);
-    }
-    cout << _vt_name << " assigned" << endl;
-
-    return *this;
-  }
-
-  bool operator==(const Vertex<_Tp>& u) const
-  {
-    if (this == &u && _vt_name == u._vt_name)
-      return true;
-    else
-      return false;
-  }
-
-  bool operator!=(const Vertex<_Tp>& u) const
-  {
-    return !(*this==u);
-  }
-
-  // getters and setters
-  string get_name(void) const {return this->_vt_name;}
-  void set_name(string name) {this->_vt_name = name;}
-
-  void set_state(VertexState_e s) {_vt_state = s;}
-  VertexState_e get_state(void) const {return _vt_state;}
+namespace graph_impl {
+  
+  typedef enum _GRAPH_STATUS {
+    FOUND = 1,
+    SUCCESS = 0,
+    NOT_FOUND = -1,
+  } GRAPH_STATUS_e;
 
   //
-  //  Add and Remove child vertex operation
+  // Vertex is a node inside a graph
+  // Vertex implementation here is a utilization of STL::list<T> class
+  // Every thing Graph should do against the Vertex neighbor or "child"
+  // should delegate to the Vertex class
   //
-  void add_child(Vertex<_Tp>& v) {
-    _vt_next.insert(_vt_next.begin(), 1, v);
-  }
+  template <class T>
+    class Vertex {
+    private:
+      /*
+       * Data sectors of a node
+       */
+      std::list<Vertex<T>*>   _neighbors;
+      T*                      _self;
+      bool                    _is_directed;
+      
+      // forbidden copy and assign
+      Vertex(const Vertex<T>& v){}
+      Vertex<T>& operator=(const Vertex<T>& v){}
 
-  void del_child(Vertex<_Tp> v) {
-    typename list<_Tp*>::iterator it;
-    for (it = _vt_next.begin(); it != _vt_next.end(); it ++) {
-      if (*it == v) {
-        _vt_next.erase(it);
-        cout << "remove " << (*it)->get_name() << endl;
+    public:
+      // convenient typenames
+      typedef typename std::list<Vertex<T>*>::iterator         v_iterator;
+      typedef typename std::list<Vertex<T>*>::const_iterator   v_const_iterator;
+      typedef typename std::list<Vertex<T>*>::size_type        size_type;
+      
+      // ctor/dtor
+      Vertex() {
+        _self = NULL;
+        _is_directed = true;
       }
-    }
-  }
 
-  typename list<_Tp*>::const_iterator first_child(void) const {
-    return _vt_next.begin();
-  }
+      Vertex(T* vptr, bool directed=true) {
+        _self = vptr;
+        _is_directed = directed;
+      }
+      
+      virtual ~Vertex() {
+        if (_neighbors.size() != 0) {
+          std::cout << "vertex deleting when size != 0" << std::endl;
+        }
+        
+        if (_self)
+          delete _self;
+      }
 
-  typename list<_Tp*>::const_iterator last_child(void) const {
-    return _vt_next.end();
-  }
+      // getters
+      T* get_node() {
+        return _self;
+      }
+      
+      // fake iterator (because we are not doing our own iterator)
+      
+      v_iterator begin() {
+        return _neighbors.begin();
+      }
+      
+      v_iterator end() {
+        return _neighbors.end();
+      }
+      
+      v_const_iterator begin() const {
+        return _neighbors.begin();
+      }
+      
+      v_const_iterator end() const {
+        return _neighbors.end();
+      }
+      
+      // overload operators ...
+      bool operator==(const Vertex<T>& other_vertex) {
+        if (this->_self != NULL) {
+          return (this->_self == other_vertex.get_node());
+        } else {
+          return false;
+        }
+      }
 
-};
+      bool operator==(const Vertex<T>* other_vertex) {
+        if (this->_self != NULL) {
+          return (this->_self == other_vertex->get_node());
+        } else {
+          return false;
+        }
+      }
+      
+      bool operator!=(const Vertex<T>& other_vertex) {
+        if (this->_self != NULL) {
+          return (this->_self != other_vertex.get_node());
+        } else {
+          return true;
+        }
+      }
+      
+      bool operator!=(const Vertex<T>* other_vertex) {
+        if (this->_self != NULL) {
+          return (this->_self != other_vertex->get_node());
+        } else {
+          return true;
+        }
+      }
+      
+      size_type size() const { return _neighbors.size(); }
 
+      //
+      //  Add and Remove child vertex operation
+      //
+      void insert(Vertex<T>* vptr) {
+        _neighbors.push_back(vptr);
+      }
+            
+      void show_info() const {
+        // this means every class T should have a show_info method
+        _self->show_info();
+      }
+  
+      v_iterator erase(v_iterator i) {
+        return _neighbors.erase(i);
+      }
 
-template<typename _T>
-class BaseGraph {
+      GRAPH_STATUS_e search(Vertex<T>* vptr) {
+        typename std::list<Vertex<T>*>::iterator itr;
+        for (itr = _neighbors.begin(); itr != _neighbors.end(); itr++) {
+          if (vptr == *itr) {
+            return FOUND;
+          }
+        }
+        return NOT_FOUND;
+      }
+    }; // end of class Vertex
 
-  // disallow the copy constructor and assign operator
-  BaseGraph(const BaseGraph<_T>& that_g);
-  BaseGraph& operator=(const BaseGraph<_T>& that_g);
+#if 0
+  template<class _Tp>
+    class Graph {
+    public:
+      typedef Vertex<_Tp>*                         node_pointer;
+      typedef Vertex<_Tp>&                         node_reference;
+      typedef const Vertex<_Tp>&                   const_node_reference;
+      typedef list<node_pointer>                   vertices;
+      typedef size_t                               size_type;
+      typedef typename vertices::iterator          iterator;
+      typedef typename vertices::const_iterator    const_iterator;
+    private:
+      // disallow the copy constructor and assign operator
+      Graph(const Graph<_Tp>& that_g);
+      Graph& operator=(const Graph<_Tp>& that_g);
+      // members
+      vertices    graph_vertex_;
+      int         count;
 
-  list<_T*>  _g_vertices;
+    public:
+      Graph() {}
+      virtual ~Graph() {}
+      // building and traversing
+      virtual void add_vertex(node_pointer vertex) {
+        graph_vertex_.insert(graph_vertex_.begin(), 1, vertex);
+      }
 
-public:
+      virtual void del_vertex(node_pointer vertex) {
+        iterator it;
 
-  BaseGraph() {}
-  virtual ~BaseGraph() {}
-  // copy and assign
+        // let all other connections know v is going to disconnect
+        for (it = graph_vertex_.begin(); it != graph_vertex_.end(); it++) {
+          if (*it != vertex) {
+            (*it)->remove_child(*vertex);
+          } else {
+            graph_vertex_.erase(it);
+          }
+        }
+      }
 
-  // building and traversing
-  virtual void add_vertex(Vertex<_T>* new_v)
-  {
-    _g_vertices.insert(_g_vertices.begin(), 1, new_v);
-  }
+      virtual void add_edge(node_reference parent, const node_pointer child) {
+        parent.insert_child(child);
+      }
 
-  virtual void del_vertex(Vertex<_T>* v)
-  {
-	typename list<_T*>::iterator it;
+      // Breadth First Traversal
+      void bfs_search(node_pointer source) {
+        vertices bfs_queue;
+        const_iterator cit;
 
-	// let all other connections know v is going to disconnect
-    for (it = _g_vertices.begin(); it != _g_vertices.end(); it++) {
-	  if (*it != v) {
-	    (*it)->del_child(v); // easy to mislead and error prone, not real delete
-	  } else {
-	    _g_vertices.erase(it);
-	  }
-    }
-  }
+        for (cit = graph_vertex_.begin(); cit != graph_vertex_.end(); cit++) {
+          if (*cit != source)
+            (*cit)->set_state(WHITE);
+          else
+            (*cit)->set_state(GRAY);
+        }
 
-  virtual void add_edge(Vertex<_T>* parent, Vertex<_T>* child)
-  {
-    parent->add_child(child);
-  }
+        bfs_queue.push_back(source);
+        while (bfs_queue.empty() != true) {
+          node_pointer u = bfs_queue.front();
+          bfs_queue.pop_front();
+          for (cit = u->begin_child(); cit != u->end_child(); cit++) {
+            if ((*cit)->state()== WHITE) {
+              (*cit)->set_state(GRAY);
+              bfs_queue.push_back(*cit);
+            }
+          }
+          u->set_state(BLACK);
+        }
+      }
+      
+      // Depth First Search (DFS) impl.
+      void dfs_search(node_pointer source) {
+      }
 
-  virtual void bfs_search(Vertex<_T>* source)
-  {
-	list<_T*> bfs_q;
-	typename list<_T*>::const_iterator cit;
-
-	for (cit = _g_vertices.begin(); cit != _g_vertices.end(); cit++) {
-	  if (*cit != source)
-	    (*cit)->set_state(WHITE);
-	  else
-	    (*cit)->set_state(GRAY);
-	}
-
-	bfs_q.push_back(source);
-	while (bfs_q.empty() != true) {
-	  Vertex<_T>* u = bfs_q.front();
-	  bfs_q.pop_front();
-	  for (cit = u->first_child(); cit != u->last_child(); cit++) {
-	    if ((*cit)->get_state()== WHITE) {
-	      (*cit)->set_state(GRAY);
-	      bfs_q.push_back(*cit);
-	    }
-	  }
-	  u->set_state(BLACK);
-	}
-  }
-};
-
-} // end namespace std
+      bool in_graph(const string& name){
+        const_iterator cit;
+        for (cit = graph_vertex_.begin(); cit != graph_vertex_.end(); cit++) {
+          if (name == (*cit)->name())
+            return true;
+        }
+        return false;
+      }
+    }; // end of class Graph
+#endif
+} // end namespace sg
 
 #endif // __GRAPH_H__
