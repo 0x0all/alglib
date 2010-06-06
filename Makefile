@@ -3,9 +3,7 @@ CXX = g++
 CC = gcc
 CXXFLAGS = -g
 
-
 OBJS := test_graph.o
-
 
 %.o: %.cc
 	$(CXX) -c $(CXXFLAGS) $*.cc -o $*.o
@@ -21,8 +19,8 @@ OBJS := test_graph.o
 
 all: testgraph
 
-testgraph: test_graph.o
-	$(CXX) -o $@ $(OBJS)
+testgraph: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
 
 clean:
 	@rm -f *.o
