@@ -17,9 +17,9 @@ OBJS := test_graph.o
 # but read (include
 -include $(OBJS:.o=.d)
 
-all: testgraph
+all: test_graph
 
-testgraph: $(OBJS)
+test_graph: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
 
 clean:
