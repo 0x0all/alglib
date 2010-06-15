@@ -47,8 +47,8 @@ public:
     std::cout << "deleting " << _name << std::endl;
   }
   
-  void show_info() const {
-    std::cout <<  _name << std::endl;
+  void show_obj() const {
+    std::cout << " " << _name << " ";
   }
 };
 
@@ -59,24 +59,21 @@ static Vertex<People>* build_vertex(class People* p, bool directed=true) {
   return NULL;
 }
 
-static void deconstruction(Vertex<People>* mpv)
+static void deconstruction(Graph<People> *graph)
 {
-  Vertex<People>* p;
-  Vertex<People>::v_iterator i;
+  typename Graph<People>::iterator i;
+  Vertex<People> *vert;
+  for (i = graph->begin(); i != graph->end(); i++) {
+    vert = *i;
+    graph->remove(vert);
+    delete vert;
+  }
 
-  i = mpv->begin();
-  while (i != mpv->end()) {
-    p = *i;
-    i = mpv->erase(i);
-    delete p;
-  }
-    
-  if (mpv) {
-    delete mpv;
-  }
+  delete graph;
 }
 
-Vertex<People>* parse_input(const char* filename)
+
+static void parse_input(const char* filename, Graph<People> *graph)
 {
   stringstream ss;
   ifstream inf;
@@ -118,7 +115,6 @@ Vertex<People>* parse_input(const char* filename)
         }
         num_direct_to--;
       }
-      total=0;
     }
 error:
     inf.close();
@@ -129,15 +125,13 @@ error:
 int main(int argc, char* argv[])
 {
   if (argc == 2) {
-    Vertex<People> *mpv = NULL;
-    mpv = parse_input(argv[1]);
-    mpv->show_info();
-    Vertex<People>::v_iterator itr;
-    for (itr = mpv->begin(); itr != mpv->end(); itr++) {
-      (*itr)->show_info();
-    }
-    
-    deconstruction(mpv);
+    Graph<People> *graph = new Graph<People>;
+    parse_input(argv[1], graph);
+    graph->show_graph();
+    deconstruction(graph);
+  } else {
+    std::cout << "Usage: execute-file [input_graph_file.txt]" << std::endl;
   }
   return 0;
 }
+
