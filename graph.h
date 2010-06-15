@@ -135,10 +135,31 @@ namespace graph_impl {
       void insert(Vertex<T>* vptr) {
         _neighbors.push_back(vptr);
       }
-            
-      void show_info() const {
+
+      void remove(Vertex<T> *vptr) {
+        if (FOUND == search(vptr)) {
+          typename std::list<Vertex<T>*>::iterator i;
+          for (i = _neighbors.begin(); i != _neighbors.end(); i++) {
+            if (vptr == *i) {
+              _neighbors.erase(i);
+            }
+          }
+        }
+      }
+
+      void show_each_info() const {
+        _self->show_obj();
+      }
+  
+      void show_vertex() const {
         // this means every class T should have a show_info method
-        _self->show_info();
+        typename std::list<Vertex<T>*>::const_iterator ci;
+        this->show_each_info();
+        std::cout << ": ";
+        for (ci = _neighbors.begin(); ci != _neighbors.end(); ci++) {
+          (*ci)->show_each_info();
+        }
+        std::cout << std::endl;
       }
   
       v_iterator erase(v_iterator i) {
@@ -156,14 +177,15 @@ namespace graph_impl {
       }
     }; // end of class Vertex
 
-#if 0
+
+  // I think it is a kind of container
   template<class _Tp>
     class Graph {
     public:
       typedef Vertex<_Tp>*                         node_pointer;
       typedef Vertex<_Tp>&                         node_reference;
       typedef const Vertex<_Tp>&                   const_node_reference;
-      typedef list<node_pointer>                   vertices;
+      typedef std::list<node_pointer>              vertices;
       typedef size_t                               size_type;
       typedef typename vertices::iterator          iterator;
       typedef typename vertices::const_iterator    const_iterator;
@@ -172,74 +194,39 @@ namespace graph_impl {
       Graph(const Graph<_Tp>& that_g);
       Graph& operator=(const Graph<_Tp>& that_g);
       // members
-      vertices    graph_vertex_;
-      int         count;
+      vertices    _graph_vertex;
+      int         _count;
+      int         _is_directed;
 
     public:
       Graph() {}
       virtual ~Graph() {}
-      // building and traversing
-      virtual void add_vertex(node_pointer vertex) {
-        graph_vertex_.insert(graph_vertex_.begin(), 1, vertex);
+
+      void insert(Vertex<_Tp> *vt) {
+        _graph_vertex.push_back(vt);
+        // FIXME do we have to check if there is a replica of the vertex?
       }
 
-      virtual void del_vertex(node_pointer vertex) {
-        iterator it;
-
-        // let all other connections know v is going to disconnect
-        for (it = graph_vertex_.begin(); it != graph_vertex_.end(); it++) {
-          if (*it != vertex) {
-            (*it)->remove_child(*vertex);
+      void remove(Vertex<_Tp> *vt) {
+        iterator i;
+        for (i = _graph_vertex.begin(); i != _graph_vertex.end(); i++) {
+          if (vt == *i) {
+            i = _graph_vertex.erase(i);
           } else {
-            graph_vertex_.erase(it);
+            (*i)->remove(vt);
           }
         }
       }
 
-      virtual void add_edge(node_reference parent, const node_pointer child) {
-        parent.insert_child(child);
-      }
-
-      // Breadth First Traversal
-      void bfs_search(node_pointer source) {
-        vertices bfs_queue;
-        const_iterator cit;
-
-        for (cit = graph_vertex_.begin(); cit != graph_vertex_.end(); cit++) {
-          if (*cit != source)
-            (*cit)->set_state(WHITE);
-          else
-            (*cit)->set_state(GRAY);
-        }
-
-        bfs_queue.push_back(source);
-        while (bfs_queue.empty() != true) {
-          node_pointer u = bfs_queue.front();
-          bfs_queue.pop_front();
-          for (cit = u->begin_child(); cit != u->end_child(); cit++) {
-            if ((*cit)->state()== WHITE) {
-              (*cit)->set_state(GRAY);
-              bfs_queue.push_back(*cit);
-            }
-          }
-          u->set_state(BLACK);
+      void show_graph(void) {
+        iterator i;
+        for (i = _graph_vertex.begin(); i != _graph_vertex.end(); i++) {
+          (*i)->show_vertex();
         }
       }
-      
-      // Depth First Search (DFS) impl.
-      void dfs_search(node_pointer source) {
-      }
 
-      bool in_graph(const string& name){
-        const_iterator cit;
-        for (cit = graph_vertex_.begin(); cit != graph_vertex_.end(); cit++) {
-          if (name == (*cit)->name())
-            return true;
-        }
-        return false;
-      }
     }; // end of class Graph
-#endif
+
 } // end namespace sg
 
 #endif // __GRAPH_H__
