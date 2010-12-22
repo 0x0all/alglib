@@ -8,6 +8,7 @@
  *  3. exception types
  *  4. mutable keyword
  *  5. STL containers insert,erase,push_back,pop, will all use a copy of T
+ *  6. 12/22/2010 start revising the design
  */
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
@@ -17,13 +18,12 @@
 #include<fstream>
 #include<list>
 
-namespace graph_impl {
+namespace _BP_GRAPH {
   
-  typedef enum _GRAPH_STATUS {
-    FOUND = 1,
-    SUCCESS = 0,
+  typedef enum {
     NOT_FOUND = -1,
-  } GRAPH_STATUS_e;
+    FOUND = 0,
+  } SEARCH_STATUS;
 
   //
   // Vertex is a node inside a graph
@@ -32,7 +32,7 @@ namespace graph_impl {
   // should delegate to the Vertex class
   //
   template <class T>
-    class Vertex {
+    class GraphNode {
     private:
       /*
        * Data sectors of a node
