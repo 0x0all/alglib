@@ -41,6 +41,9 @@ class Node:
   def set_deg(degree):
     self._degree = degree 
 
-class BST:
-  pass
+class BST(object):
+  def __init__(self):
+    self._node = []
+
+
 class BTree(BST):
