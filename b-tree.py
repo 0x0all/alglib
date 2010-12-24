@@ -42,8 +42,60 @@ class Node:
     self._degree = degree 
 
 class BST(object):
-  def __init__(self):
-    self._node = []
+  ''' The operation in the BST requires the Node object to be able to:
+      1. compare with each other
+      2. has left and right child pointer
+  '''
+  def __init__(self, r = None):
+    self._root = r
+
+  def __search(self, node, key):
+    if node == key:
+      return node
+    else:
+      if node < key:
+        if node.right is not None:
+          self.__search(self, node.right, key)
+        else:
+          return None
+      else:
+        if node.left is not None:
+          self.__search(self, node.left, key)
+        else:
+          return None
+
+  def search(self, key):
+    if self._root == key:
+      return self._root
+    else:
+      if self._root < key:
+        if self._root.right is not None:
+          return self.__search(self, self._root.right, key)
+        else:
+          return None
+      else:
+        if self._root.left is not None:
+          return self.__search(self, self._root.left, key)
+        else:
+          return None
+
+  def insert(self, key):
+    if self._root is None:
+      self._root = key
+    else:
+      node = self._root
+      while node is not None:
+        if node < key:
+          if node.right is None:
+            node.right = key
+          else:
+            node = node.right
+        else:
+          if node.left is None:
+            node.left = key
+          else:
+            node = node.left
+
+  def delete(self, key):
 
 
-class BTree(BST):
