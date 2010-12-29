@@ -7,39 +7,60 @@ right now, I just want to implement and practice these BTree operations.
 '''
 
 
-'''
-This Key class here is just used as an example or test purposes.
-It can be replaced by other data object classes that is designed
-and used in the BTree
-'''
-class Key:
-  """Key in the Tree is used to sort, compare in various operations"""
-  def __init__(self):
-    self.value = 0
-  def __lt__(self, other):
-    if self.value < other.value:
-      return True
-    else:
-      return False
-  def __le__(self, other):
-    if self.value <= other.value:
-      return True
-    else
-      return False
- 
+class BSTError(Exception): pass
+class UnknownNodeTypeError(BSTError): pass
+class ReassignError(BSTError): pass
+
+
 '''
 Node class has-a or has-a lot of Key class objects
 '''
-class Node:
-  """The B-Tree node contains t-1 <= # of keys <= 2t-1
-     and also may or may not havs child nodes downward"""
-  degree_ = 0
-  def __init__(self, keys = [], childs = []):
-    self._keys = keys
-    self._childs = childs
-  @staticmethod
-  def set_deg(degree):
-    self._degree = degree 
+class TreeNode:
+  def __init__(self, key = None):
+    self.__key = key
+    self.__parent = None
+    self.__left = None
+    self.__right = None
+
+  def __getattr__(self, name):
+    if name == 'left':
+      return self.__left
+    elif name == 'right':
+      return self.__right
+    elif name == 'parent':
+      return self.__parent
+    elif name == 'key':
+      return self.__key
+    else:
+      raise UnknownNodeTypeError, "BST only support left, right and parent. No %s"%(name)
+
+  def __setattr__(self, name, it):
+    if name == 'left':
+      if self.__left is not None:
+        raise ReassignError, "The %s is already assigned to some other node"%(name)
+      else:
+        self.__left = it
+      return
+    if name == 'right':
+      if self.__right is not None:
+        raise ReassignError, "The %s is already assigned to some other node"%(name)
+      else:
+        self.__right = it
+      return
+    if name == 'parent':
+      if self.__parent is not None:
+        raise ReassignError, "The %s is already assigned to some other node"%(name)
+      else:
+        self.__parent = it
+      return
+    if name == 'key':
+      self.__key = it
+    raise UnknownNodeTypeError, "The assign of the node should be left, right or parent"
+
+  def __cmp__(self, other):
+    '''Delegation of comparison calls to the key's comparison method
+       It is actually comparing the keys not the node'''
+    return self.__key.__cmp__(other.key)
 
 class BST(object):
   ''' The operation in the BST requires the Node object to be able to:
@@ -47,14 +68,14 @@ class BST(object):
       2. has left and right child pointer
   '''
   def __init__(self, r = None):
-    self._root = r
+    self._root = TreeNode(r)
 
   def __search(self, node, key):
     if node == key:
       return node
     else:
       if node < key:
-        if node.right is not None:
+        if self.__right(self, node) is not None:
           self.__search(self, node.right, key)
         else:
           return None
@@ -88,14 +109,34 @@ class BST(object):
         if node < key:
           if node.right is None:
             node.right = key
+            key.parent = node
           else:
             node = node.right
         else:
           if node.left is None:
             node.left = key
+            key.parent = node
           else:
             node = node.left
 
-  def delete(self, key):
+  def successor(self, key):
+    raise NotImplementedError
 
+  def predecessor(self, key):
+    node = self.search(self, key)
+    if node is not None:
+      if self.__left(self, node) is not None:
+        return self.find_max(self, self.__left(self, node))
+      else:
+        parent = self.__parent(self, node)
+        tmp = node
+        while parent is not None:
+          if id(self.__left(self, parent)) == id(tmp):
+            return parent
+          else:
+            tmp = parent
+            parent = self.__parent(self, parent)
+        return tmp
+
+  def find_max(self, node):
 
