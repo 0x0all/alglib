@@ -20,7 +20,8 @@ class TestNode(unittest.TestCase):
     self.assertEqual(id(right.parent), id(node))
     self.assertEqual(id(node.parent), id(parent))
     self.assertEqual(id(parent.left), id(node))
-
+    self.assertTrue(parent.key > left.key)
+    self.assertTrue(parent > left)
 
 if __name__ == '__main__':
   unittest.main()
